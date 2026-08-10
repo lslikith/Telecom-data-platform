@@ -1,0 +1,6 @@
+plan_id,plan_name,monthly_price,data_limit_gb,network_type,voice_minutes,sms_limit,validity_days
+P001,Basic 299,299,30,4G,500,100,30
+P002,Premium 499,499,75,5G,1000,500,30
+P003,Unlimited 799,799,-1,5G,-1,-1,30
+P004,Family 999,999,-1,5G,-1,-1,30
+P005,Business 1499,1499,-1,5G,-1,-1,30

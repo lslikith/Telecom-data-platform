@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual Environment
+.venv/
+venv/
+
+# Environment Variables
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Python cache
+.pytest_cache/
+.mypy_cache/
+
+# Logs
+logs/
+*.log
+
+# Airflow
+airflow/logs/
+airflow/airflow.db
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+
+# Temporary
+*.tmp
+
+# Jupyter
+.ipynb_checkpoints/
