@@ -15,6 +15,7 @@ DATASETS = PROJECT_ROOT / "datasets"
 CRM_DIR = DATASETS / "crm"
 
 GENERATED_DIR = DATASETS / "generated"
+MASTER_DIR = DATASETS / "master"
 
 PLANS_DIR = GENERATED_DIR / "plans"
 TOWERS_DIR = GENERATED_DIR / "towers"
