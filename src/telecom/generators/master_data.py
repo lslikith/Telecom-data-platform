@@ -103,6 +103,50 @@ def generate_cities():
     print("\nCities Generated Successfully\n")
     print(df)
 
+def generate_plans():
+
+    
+    plans = [
+
+    {
+        "plan_id": "P001",
+        "plan_name": "Basic 299",
+        "monthly_price": 299,
+        "validity_days": 28,
+        "data_limit_gb": 30,
+        "voice_minutes": "Unlimited",
+        "sms_limit": 100,
+        "network_type": "4G",
+        "plan_category": "Prepaid"
+    },
+
+    {
+        "plan_id": "P002",
+        "plan_name": "Premium 499",
+        "monthly_price": 499,
+        "validity_days": 28,
+        "data_limit_gb": 75,
+        "voice_minutes": "Unlimited",
+        "sms_limit": 100,
+        "network_type": "5G",
+        "plan_category": "Prepaid"
+    }
+    ]
+
+
+    df = pd.DataFrame(plans)
+
+    output_path = MASTER_DIR / "telecom_plans.csv"
+
+    df.to_csv(
+        output_path,
+        index=False
+    )
+
+    print("\nPlans Generated Successfully\n")
+    print(df)
+
 if __name__ == "__main__":
     generate_vendors()
     generate_cities()
+    generate_plans()
