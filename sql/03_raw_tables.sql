@@ -1,0 +1,33 @@
+-- =====================================================
+-- RAW TABLES
+-- =====================================================
+
+USE DATABASE TELECOM_DB;
+USE SCHEMA RAW;
+
+CREATE OR REPLACE TABLE RAW_CUSTOMERS (
+
+    CUSTOMER_ID         STRING,
+    GENDER              STRING,
+    SENIOR_CITIZEN      NUMBER(1,0),
+    PARTNER             STRING,
+    DEPENDENTS          STRING,
+    TENURE              NUMBER(5,0),
+    PHONE_SERVICE       STRING,
+    MULTIPLE_LINES      STRING,
+    INTERNET_SERVICE    STRING,
+    ONLINE_SECURITY     STRING,
+    ONLINE_BACKUP       STRING,
+    DEVICE_PROTECTION   STRING,
+    TECH_SUPPORT        STRING,
+    STREAMING_TV        STRING,
+    STREAMING_MOVIES    STRING,
+    CONTRACT            STRING,
+    PAPERLESS_BILLING   STRING,
+    PAYMENT_METHOD      STRING,
+    MONTHLY_CHARGES     NUMBER(10,2),
+    TOTAL_CHARGES       STRING,
+    CHURN               STRING,
+    LOAD_DATE           TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+
+);
