@@ -42,14 +42,7 @@ Power BI / Tableau
 ## Project Status
 
 - [x] Project setup
-- [x] Python package structure
-- [x] Plans Generator
-- [ ] Towers Generator
-- [ ] Usage Generator
-- [ ] Billing Generator
-- [ ] Payment Generator
-- [ ] Support Generator
-- [ ] Outage Generator
+- [x] Python package structure        
 - [ ] AWS S3 Integration
 - [ ] Snowflake Integration
 - [ ] dbt Models
