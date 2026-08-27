@@ -31,12 +31,10 @@ clean-targets:         # directories to be removed by `dbt clean`
 # files using the `{{ config(...) }}` macro.
 models:
   telecom_dbt:
-
     staging:
-      +materialized: view
-
-    intermediate:
+      +schema: staging
       +materialized: view
 
     marts:
+      +schema: marts
       +materialized: table

@@ -7,3 +7,8 @@ sources:
 
     tables:
       - name: raw_customers
+        columns:
+          - name: CUSTOMER_ID
+            data_tests:
+              - not_null
+              - unique
