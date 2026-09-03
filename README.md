@@ -70,6 +70,72 @@ flowchart TD
 
 ---
 
+## ❄️ Snowflake Lakehouse Architecture & Object Hierarchy
+
+The data platform is organized across a 3-tier medallion architecture in **Snowflake**:
+
+```mermaid
+graph TD
+    WH["Virtual Warehouse: TELECOM_WH (XSMALL, Auto-suspend 60s)"]
+    DB[("Database: TELECOM_DB")]
+    WH --> DB
+
+    subgraph RAW ["1. Bronze Layer: TELECOM_DB.RAW"]
+        R1[RAW_CUSTOMERS - 7,043 rows]
+        R2[RAW_BILLING - 21,129 rows]
+        R3[RAW_PAYMENTS - 19,488 rows]
+        R4[RAW_USAGE - 11,936 rows]
+        R5[RAW_SUPPORT_TICKETS - 3,500 rows]
+        R6[RAW_NETWORK_OUTAGES - 250 rows]
+        R7[RAW_TOWERS - 100 rows]
+        R8[RAW_PLANS - 7 rows]
+        STAGE["Stage: @CRM_STAGE"]
+        FF["Format: CSV_FILE_FORMAT"]
+    end
+
+    subgraph STAGING ["2. Silver Layer: TELECOM_DB.STAGING"]
+        S1[STG_CUSTOMERS - Cleaned Demographics & Contracts]
+        S2[STG_BILLING - Normalized Bills & Taxes]
+        S3[STG_PAYMENTS - Payment Receipts & Gateway Status]
+        S4[STG_USAGE - Subscriber Daily Voice & Data MB/GB]
+        S5[STG_SUPPORT_TICKETS - Turnaround Hours & CSAT]
+        S6[STG_NETWORK_OUTAGES - Outage Duration & Impact]
+        S7[STG_TOWERS - Cell Tower Coordinates & Vendor]
+        S8[STG_PLANS - 4G/5G/Fiber Plan Pricing]
+    end
+
+    subgraph MARTS ["3. Gold Layer: TELECOM_DB.MARTS"]
+        M1[DIM_CUSTOMERS - Customer Dimension + Cohorts]
+        M2[DIM_PLANS - Plan Dimension]
+        M3[DIM_TOWERS - Cell Tower Dimension + Availability %]
+        M4[FCT_BILLING_PAYMENTS - Invoice Fulfillment Fact]
+        M5[FCT_DAILY_USAGE - Cellular Consumption Fact]
+        M6[FCT_SUPPORT_TICKETS - Service Resolution Fact]
+        M7[CHURN_RISK_ANALYSIS - Multi-Factor Churn Scoring 0-100]
+        M8[CHURN_BY_CONTRACT - Churn Rate by Contract Mart]
+        M9[CUSTOMER_CHURN_SUMMARY - Executive KPI Overview]
+        M10[NETWORK_PERFORMANCE_MARTS - Tower Load & Reliability]
+        M11[SNAP_CUSTOMERS - SCD Type 2 Historical Tracker]
+    end
+
+    DB --> RAW
+    DB --> STAGING
+    DB --> MARTS
+
+    RAW -->|dbt Staging Views| STAGING
+    STAGING -->|dbt Marts Tables| MARTS
+```
+
+### Snowflake Database & Schema Breakdown
+
+| Schema | Object Type | Objects Count | Purpose |
+| :--- | :--- | :--- | :--- |
+| **`RAW`** | Tables, Stage, File Format | 8 Tables, 1 Stage, 1 File Format | Bronze landing layer for direct CSV file ingestion via `COPY INTO`. |
+| **`STAGING`** | Views | 8 Views | Silver layer standardizing data types, handling empty strings as NULL, and casting booleans. |
+| **`MARTS`** | Tables & Snapshots | 10 Tables, 1 SCD2 Snapshot | Gold analytical layer containing conformed dimensions, transaction facts, predictive churn scores, and KPIs. |
+
+---
+
 ## 📂 Project Directory Structure
 
 ```text
@@ -89,17 +155,17 @@ Telecom-data-platform/
 │       ├── towers/                # Cell tower RAN network data
 │       └── usage/                 # Daily voice/data/SMS records
 │
-├── sql/                           # Modular Snowflake SQL Infrastructure Scripts
-│   ├── README.md                  # Snowflake execution guide
-│   ├── 00_environment_setup.sql   # Warehouse, DB, schemas, role definitions
-│   ├── 01_file_formats.sql        # Standardized CSV file format
-│   ├── 02_stages.sql              # Internal & external stage definitions
-│   ├── 03_raw_tables.sql          # DDL for all 8 RAW layer tables
-│   ├── 04_copy_into.sql           # COPY INTO statements with error handling
-│   ├── 05_validation.sql          # Data audits, table row counts & PK verification
-│   ├── 06_queries.sql             # Business intelligence & analytical queries
-│   ├── 07_storage_integrations.sql# AWS S3 IAM Role integration
-│   └── 08_external_stage.sql      # External S3 bucket stage
+├── snowflake/                     # Complete Snowflake Infrastructure & Analytics SQL
+│   ├── README.md                  # Snowflake execution guide & object catalog
+│   ├── 01_setup_warehouse_database_schemas.sql # Warehouse, DB, schemas, and role setup
+│   ├── 02_file_formats_and_stages.sql          # CSV format, @CRM_STAGE, S3 integration
+│   ├── 03_raw_schema_ddl_and_ingestion.sql     # 8 RAW tables DDL & COPY INTO statements
+│   ├── 04_staging_layer_models.sql             # 8 STAGING view DDL definitions
+│   ├── 05_marts_dimensions_and_facts.sql       # Conformed dimensions & fact tables DDL
+│   ├── 06_analytics_marts_and_churn_scoring.sql# Churn risk scoring & network marts DDL
+│   ├── 07_snapshots_scd2_layer.sql             # SCD Type 2 snapshot tables & point-in-time queries
+│   ├── 08_data_validation_and_audit_queries.sql# Cross-layer row counts & PK uniqueness audits
+│   └── 09_business_intelligence_queries.sql    # Executive dashboards & BI analytical queries
 │
 ├── dbt/telecom_dbt/               # Production dbt Project
 │   ├── dbt_project.yml            # Project configuration & schema routing

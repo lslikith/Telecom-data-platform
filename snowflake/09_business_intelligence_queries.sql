@@ -1,0 +1,100 @@
+-- ==============================================================================
+-- TELECOM DATA PLATFORM — SNOWFLAKE INFRASTRUCTURE SETUP
+-- SCRIPT 09: Business Intelligence & Executive Analytics Queries
+-- ==============================================================================
+
+USE WAREHOUSE TELECOM_WH;
+USE DATABASE TELECOM_DB;
+USE SCHEMA MARTS;
+
+-- ==============================================================================
+-- 1. EXECUTIVE CHURN OVERVIEW & FINANCIAL IMPACT
+-- ==============================================================================
+SELECT 
+    TOTAL_CUSTOMERS,
+    CHURNED_CUSTOMERS,
+    ACTIVE_CUSTOMERS,
+    CHURN_RATE_PERCENT,
+    ROUND(CHURNED_CUSTOMERS * 64.76, 2) AS ESTIMATED_MONTHLY_REVENUE_LOSS_INR
+FROM TELECOM_DB.MARTS.CUSTOMER_CHURN_SUMMARY;
+
+-- ==============================================================================
+-- 2. CHURN RATE BY CONTRACT TERM & PAPERLESS BILLING
+-- ==============================================================================
+SELECT 
+    c.CONTRACT,
+    c.HAS_PAPERLESS_BILLING,
+    COUNT(*) AS TOTAL_SUBSCRIBERS,
+    SUM(c.CHURN_FLAG) AS CHURNED_SUBSCRIBERS,
+    ROUND(SUM(c.CHURN_FLAG) * 100.0 / COUNT(*), 2) AS CHURN_PERCENTAGE,
+    ROUND(AVG(c.MONTHLY_CHARGES), 2) AS ARPU_INR
+FROM TELECOM_DB.MARTS.DIM_CUSTOMERS c
+GROUP BY c.CONTRACT, c.HAS_PAPERLESS_BILLING
+ORDER BY CHURN_PERCENTAGE DESC;
+
+-- ==============================================================================
+-- 3. PREDICTIVE CHURN RISK TIER BREAKDOWN
+-- ==============================================================================
+SELECT 
+    CHURN_RISK_TIER,
+    COUNT(*) AS TOTAL_SUBSCRIBERS,
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) AS SUBSCRIBER_SHARE_PCT,
+    ROUND(AVG(CHURN_RISK_SCORE), 1) AS AVG_CHURN_RISK_SCORE,
+    ROUND(AVG(MONTHLY_CHARGES), 2) AS AVG_MONTHLY_REVENUE,
+    SUM(CHURN_FLAG) AS ACTUAL_HISTORICAL_CHURNED,
+    ROUND(SUM(CHURN_FLAG) * 100.0 / COUNT(*), 2) AS HISTORICAL_ACCURACY_PCT
+FROM TELECOM_DB.MARTS.CHURN_RISK_ANALYSIS
+GROUP BY CHURN_RISK_TIER
+ORDER BY AVG_CHURN_RISK_SCORE DESC;
+
+-- ==============================================================================
+-- 4. CELL TOWER RELIABILITY, TRAFFIC LOAD & OUTAGE IMPACT BY METRO
+-- ==============================================================================
+SELECT 
+    CITY,
+    TECHNOLOGY,
+    COUNT(DISTINCT TOWER_ID) AS TOTAL_TOWERS,
+    ROUND(AVG(UPTIME_AVAILABILITY_PCT), 2) AS AVG_UPTIME_PCT,
+    SUM(TOTAL_DOWNTIME_MINUTES) AS TOTAL_OUTAGE_MINS,
+    SUM(TOTAL_SUBSCRIBERS_IMPACTED) AS TOTAL_SUBSCRIBERS_IMPACTED,
+    ROUND(SUM(TOTAL_DATA_SERVED_GB), 2) AS TOTAL_DATA_SERVED_GB,
+    ROUND(AVG(CAPACITY_UTILIZATION_PCT), 2) AS AVG_CAPACITY_UTILIZATION_PCT
+FROM TELECOM_DB.MARTS.NETWORK_PERFORMANCE_MARTS
+GROUP BY CITY, TECHNOLOGY
+ORDER BY TOTAL_OUTAGE_MINS DESC;
+
+-- ==============================================================================
+-- 5. CUSTOMER SUPPORT ROOT CAUSE & CSAT CORRELATION WITH CHURN
+-- ==============================================================================
+SELECT 
+    CATEGORY AS COMPLAINT_CATEGORY,
+    PRIORITY,
+    COUNT(TICKET_ID) AS TOTAL_TICKETS,
+    ROUND(AVG(RESOLUTION_TIME_HOURS), 1) AS AVG_RESOLUTION_HOURS,
+    ROUND(AVG(SATISFACTION_SCORE), 2) AS AVG_CSAT,
+    SUM(CHURN_FLAG) AS CHURNED_COMPLAINANTS,
+    ROUND(SUM(CHURN_FLAG) * 100.0 / COUNT(*), 2) AS CHURN_PERCENTAGE
+FROM TELECOM_DB.MARTS.FCT_SUPPORT_TICKETS
+GROUP BY CATEGORY, PRIORITY
+ORDER BY TOTAL_TICKETS DESC;
+
+-- ==============================================================================
+-- 6. TOP 20 HIGH-VALUE CUSTOMERS AT CRITICAL CHURN RISK (ACTION LIST FOR CRM)
+-- ==============================================================================
+SELECT 
+    CUSTOMER_ID,
+    GENDER,
+    TENURE_MONTHS,
+    CONTRACT,
+    PAYMENT_METHOD,
+    MONTHLY_CHARGES,
+    TOTAL_SUPPORT_TICKETS,
+    AVG_CSAT_SCORE,
+    OVERDUE_BILLS_COUNT,
+    CHURN_RISK_SCORE,
+    CHURN_RISK_TIER
+FROM TELECOM_DB.MARTS.CHURN_RISK_ANALYSIS
+WHERE CHURN_RISK_TIER = 'HIGH RISK'
+  AND CHURN_FLAG = 0 -- Still active! Target for proactive retention
+ORDER BY MONTHLY_CHARGES DESC, CHURN_RISK_SCORE DESC
+LIMIT 20;
