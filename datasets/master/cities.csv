@@ -1,4 +1,11 @@
 city_id,city,state,telecom_circle,latitude,longitude
-CT001,Bengaluru,Karnataka,South,12.9716,77.5946
-CT002,Mysuru,Karnataka,South,12.2958,76.6394
-CT003,Hyderabad,Telangana,South,17.385,78.4867
+CT001,Bengaluru,Karnataka,Karnataka,12.9716,77.5946
+CT002,Mysuru,Karnataka,Karnataka,12.2958,76.6394
+CT003,Hyderabad,Telangana,Andhra Pradesh & Telangana,17.385,78.4867
+CT004,Chennai,Tamil Nadu,Tamil Nadu,13.0827,80.2707
+CT005,Mumbai,Maharashtra,Mumbai,19.076,72.8777
+CT006,Pune,Maharashtra,Maharashtra & Goa,18.5204,73.8567
+CT007,Delhi,Delhi,Delhi NCR,28.7041,77.1025
+CT008,Kolkata,West Bengal,Kolkata,22.5726,88.3639
+CT009,Ahmedabad,Gujarat,Gujarat,23.0225,72.5714
+CT010,Jaipur,Rajasthan,Rajasthan,26.9124,75.7873

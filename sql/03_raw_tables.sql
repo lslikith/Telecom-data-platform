@@ -1,12 +1,14 @@
 -- =====================================================
--- RAW TABLES
+-- PROJECT : Telecom Analytics Platform
+-- PURPOSE : Snowflake RAW Layer Table Definitions
 -- =====================================================
 
+USE WAREHOUSE TELECOM_WH;
 USE DATABASE TELECOM_DB;
 USE SCHEMA RAW;
 
+-- 1. Customers (CRM Source)
 CREATE OR REPLACE TABLE RAW_CUSTOMERS (
-
     CUSTOMER_ID         STRING,
     GENDER              STRING,
     SENIOR_CITIZEN      NUMBER(1,0),
@@ -28,6 +30,107 @@ CREATE OR REPLACE TABLE RAW_CUSTOMERS (
     MONTHLY_CHARGES     NUMBER(10,2),
     TOTAL_CHARGES       STRING,
     CHURN               STRING,
-    LOAD_DATE           TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+    LOAD_DATE           TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
 
+-- 2. Master Telecom Plans
+CREATE OR REPLACE TABLE RAW_PLANS (
+    PLAN_ID             STRING,
+    PLAN_NAME           STRING,
+    MONTHLY_PRICE       NUMBER(10,2),
+    DATA_LIMIT_GB       NUMBER(10,0),
+    NETWORK_TYPE        STRING,
+    VOICE_MINUTES       NUMBER(10,0),
+    SMS_LIMIT           NUMBER(10,0),
+    VALIDITY_DAYS       NUMBER(5,0),
+    PLAN_CATEGORY       STRING,
+    LOAD_DATE           TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- 3. Cell Towers Network Infrastructure
+CREATE OR REPLACE TABLE RAW_TOWERS (
+    TOWER_ID            STRING,
+    TOWER_NAME          STRING,
+    CITY                STRING,
+    STATE               STRING,
+    LATITUDE            NUMBER(10,6),
+    LONGITUDE           NUMBER(10,6),
+    TECHNOLOGY          STRING,
+    VENDOR              STRING,
+    CAPACITY            NUMBER(10,0),
+    INSTALLATION_DATE   DATE,
+    STATUS              STRING,
+    LOAD_DATE           TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- 4. Customer Billing Cycles
+CREATE OR REPLACE TABLE RAW_BILLING (
+    BILL_ID             STRING,
+    CUSTOMER_ID         STRING,
+    BILLING_PERIOD      STRING,
+    BILL_DATE           DATE,
+    DUE_DATE            DATE,
+    BASE_AMOUNT         NUMBER(10,2),
+    ADDITIONAL_CHARGES  NUMBER(10,2),
+    DISCOUNT_AMOUNT     NUMBER(10,2),
+    TAX_AMOUNT          NUMBER(10,2),
+    TOTAL_AMOUNT        NUMBER(10,2),
+    PAYMENT_STATUS      STRING,
+    LOAD_DATE           TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- 5. Payment Transactions
+CREATE OR REPLACE TABLE RAW_PAYMENTS (
+    PAYMENT_ID          STRING,
+    BILL_ID             STRING,
+    CUSTOMER_ID         STRING,
+    PAYMENT_DATETIME    TIMESTAMP_NTZ,
+    AMOUNT              NUMBER(10,2),
+    PAYMENT_METHOD      STRING,
+    PAYMENT_GATEWAY     STRING,
+    TRANSACTION_STATUS  STRING,
+    TRANSACTION_REF     STRING,
+    LOAD_DATE           TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- 6. Cellular Usage Records
+CREATE OR REPLACE TABLE RAW_USAGE (
+    USAGE_ID            STRING,
+    CUSTOMER_ID         STRING,
+    USAGE_DATE          DATE,
+    TOWER_ID            STRING,
+    VOICE_MINUTES       NUMBER(10,0),
+    DATA_USAGE_MB       NUMBER(12,2),
+    DATA_USAGE_GB       NUMBER(12,3),
+    SMS_COUNT           NUMBER(10,0),
+    IS_ROAMING          BOOLEAN,
+    LOAD_DATE           TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- 7. Customer Support Tickets
+CREATE OR REPLACE TABLE RAW_SUPPORT_TICKETS (
+    TICKET_ID           STRING,
+    CUSTOMER_ID         STRING,
+    CATEGORY            STRING,
+    PRIORITY            STRING,
+    CHANNEL             STRING,
+    CREATED_AT          TIMESTAMP_NTZ,
+    RESOLVED_AT         TIMESTAMP_NTZ,
+    RESOLUTION_TIME_HOURS NUMBER(10,1),
+    STATUS              STRING,
+    SATISFACTION_SCORE  NUMBER(2,0),
+    LOAD_DATE           TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- 8. Network Tower Outages
+CREATE OR REPLACE TABLE RAW_NETWORK_OUTAGES (
+    OUTAGE_ID           STRING,
+    TOWER_ID            STRING,
+    OUTAGE_START        TIMESTAMP_NTZ,
+    OUTAGE_END          TIMESTAMP_NTZ,
+    DURATION_MINUTES    NUMBER(10,0),
+    SEVERITY            STRING,
+    CAUSE               STRING,
+    ESTIMATED_IMPACTED_USERS NUMBER(10,0),
+    LOAD_DATE           TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
 );

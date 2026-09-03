@@ -1,3 +1,8 @@
 plan_id,plan_name,monthly_price,validity_days,data_limit_gb,voice_minutes,sms_limit,network_type,plan_category
-P001,Basic 299,299,28,30,Unlimited,100,4G,Prepaid
-P002,Premium 499,499,28,75,Unlimited,100,5G,Prepaid
+P001,Basic 299,299.0,28,30,Unlimited,100,4G,Prepaid
+P002,Premium 499,499.0,28,75,Unlimited,100,5G,Prepaid
+P003,Unlimited 799,799.0,30,-1,Unlimited,-1,5G,Postpaid
+P004,Family 999,999.0,30,-1,Unlimited,-1,5G,Postpaid
+P005,Business 1499,1499.0,30,-1,Unlimited,-1,5G,Postpaid
+P006,Fiber Starter 599,599.0,30,3300,Unlimited,0,Fiber,Broadband
+P007,Fiber Gigafast 1499,1499.0,30,3300,Unlimited,0,Fiber,Broadband

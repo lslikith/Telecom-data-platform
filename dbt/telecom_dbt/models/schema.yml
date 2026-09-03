@@ -1,0 +1,215 @@
+version: 2
+
+models:
+  # -------------------------------------------------------------
+  # STAGING LAYER
+  # -------------------------------------------------------------
+  - name: stg_customers
+    description: "Standardized customer demographic, subscription, and churn status."
+    columns:
+      - name: CUSTOMER_ID
+        tests:
+          - not_null
+          - unique
+      - name: CHURN_FLAG
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+
+  - name: stg_plans
+    description: "Standardized telecom service plans catalog."
+    columns:
+      - name: PLAN_ID
+        tests:
+          - not_null
+          - unique
+      - name: MONTHLY_PRICE
+        tests:
+          - not_null
+
+  - name: stg_towers
+    description: "Standardized cellular network towers."
+    columns:
+      - name: TOWER_ID
+        tests:
+          - not_null
+          - unique
+      - name: IS_ACTIVE
+        tests:
+          - not_null
+
+  - name: stg_billing
+    description: "Customer monthly billing statements and totals."
+    columns:
+      - name: BILL_ID
+        tests:
+          - not_null
+          - unique
+      - name: CUSTOMER_ID
+        tests:
+          - not_null
+
+  - name: stg_payments
+    description: "Customer invoice payments and payment gateway logs."
+    columns:
+      - name: PAYMENT_ID
+        tests:
+          - not_null
+          - unique
+      - name: BILL_ID
+        tests:
+          - not_null
+
+  - name: stg_usage
+    description: "High-resolution daily subscriber usage statistics."
+    columns:
+      - name: USAGE_ID
+        tests:
+          - not_null
+          - unique
+      - name: CUSTOMER_ID
+        tests:
+          - not_null
+
+  - name: stg_support_tickets
+    description: "Customer care service tickets and resolution metrics."
+    columns:
+      - name: TICKET_ID
+        tests:
+          - not_null
+          - unique
+      - name: CUSTOMER_ID
+        tests:
+          - not_null
+
+  - name: stg_network_outages
+    description: "Network tower outage events and duration."
+    columns:
+      - name: OUTAGE_ID
+        tests:
+          - not_null
+          - unique
+      - name: TOWER_ID
+        tests:
+          - not_null
+
+  # -------------------------------------------------------------
+  # MARTS LAYER
+  # -------------------------------------------------------------
+  - name: dim_customers
+    description: "Conformed customer dimension enriched with tenure cohorts, active service counts, and support stats."
+    columns:
+      - name: CUSTOMER_KEY
+        tests:
+          - not_null
+          - unique
+      - name: CUSTOMER_ID
+        tests:
+          - not_null
+          - unique
+      - name: CHURN_FLAG
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+
+  - name: dim_plans
+    description: "Conformed plans dimension."
+    columns:
+      - name: PLAN_KEY
+        tests:
+          - not_null
+          - unique
+      - name: PLAN_ID
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_towers
+    description: "Conformed cell tower network dimension with calculated reliability and uptime."
+    columns:
+      - name: TOWER_KEY
+        tests:
+          - not_null
+          - unique
+      - name: TOWER_ID
+        tests:
+          - not_null
+          - unique
+
+  - name: fct_billing_payments
+    description: "Billing and payment fulfillment fact table tracking invoice settlement and delinquency."
+    columns:
+      - name: BILLING_KEY
+        tests:
+          - not_null
+          - unique
+      - name: BILL_ID
+        tests:
+          - not_null
+          - unique
+
+  - name: fct_daily_usage
+    description: "Daily granular subscriber cellular network usage fact table."
+    columns:
+      - name: USAGE_KEY
+        tests:
+          - not_null
+          - unique
+      - name: USAGE_ID
+        tests:
+          - not_null
+          - unique
+
+  - name: fct_support_tickets
+    description: "Customer service tickets fact table with resolution turnaround and CSAT category."
+    columns:
+      - name: TICKET_KEY
+        tests:
+          - not_null
+          - unique
+      - name: TICKET_ID
+        tests:
+          - not_null
+          - unique
+
+  - name: churn_by_contract
+    description: "Aggregated churn rates and subscriber volumes categorized by contract term."
+    columns:
+      - name: CONTRACT
+        tests:
+          - not_null
+          - unique
+
+  - name: customer_churn_summary
+    description: "High-level KPI executive overview of active vs churned customer base."
+    columns:
+      - name: TOTAL_CUSTOMERS
+        tests:
+          - not_null
+
+  - name: churn_risk_analysis
+    description: "Predictive multi-factor churn risk scoring (0-100) and risk tiering."
+    columns:
+      - name: CUSTOMER_ID
+        tests:
+          - not_null
+          - unique
+      - name: CHURN_RISK_TIER
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['LOW RISK', 'MEDIUM RISK', 'HIGH RISK']
+
+  - name: network_performance_marts
+    description: "Cell tower network utilization, total data served, and reliability mart."
+    columns:
+      - name: TOWER_KEY
+        tests:
+          - not_null
+          - unique
+      - name: TOWER_ID
+        tests:
+          - not_null
+          - unique

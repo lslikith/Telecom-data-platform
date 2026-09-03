@@ -4,11 +4,118 @@ sources:
   - name: raw
     database: TELECOM_DB
     schema: RAW
-
+    description: "Raw ingestion layer containing source CRM records and operational telecom feeds."
     tables:
       - name: raw_customers
+        description: "Customer demographic and subscription data from CRM source."
         columns:
           - name: CUSTOMER_ID
-            data_tests:
+            description: "Primary key for customer record."
+            tests:
               - not_null
               - unique
+          - name: CHURN
+            description: "Customer churn status (Yes/No)."
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['Yes', 'No']
+
+      - name: raw_plans
+        description: "Master catalog of mobile and fiber broadband plans."
+        columns:
+          - name: PLAN_ID
+            description: "Unique plan identifier."
+            tests:
+              - not_null
+              - unique
+          - name: MONTHLY_PRICE
+            description: "Monthly subscription price in INR."
+            tests:
+              - not_null
+
+      - name: raw_towers
+        description: "Cellular radio access network (RAN) cell towers."
+        columns:
+          - name: TOWER_ID
+            description: "Unique cell tower identifier."
+            tests:
+              - not_null
+              - unique
+          - name: TECHNOLOGY
+            description: "Cellular network technology generation (4G/5G)."
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['4G', '5G']
+
+      - name: raw_billing
+        description: "Monthly customer billing statements and invoice records."
+        columns:
+          - name: BILL_ID
+            description: "Unique billing invoice ID."
+            tests:
+              - not_null
+              - unique
+          - name: CUSTOMER_ID
+            description: "Customer foreign key."
+            tests:
+              - not_null
+
+      - name: raw_payments
+        description: "Payment transaction receipts and fulfillment records."
+        columns:
+          - name: PAYMENT_ID
+            description: "Unique payment transaction identifier."
+            tests:
+              - not_null
+              - unique
+          - name: BILL_ID
+            description: "Associated billing statement ID."
+            tests:
+              - not_null
+          - name: TRANSACTION_STATUS
+            description: "Payment transaction outcome."
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['SUCCESS', 'FAILED', 'REFUNDED']
+
+      - name: raw_usage
+        description: "Daily granular subscriber voice, data, and SMS consumption events."
+        columns:
+          - name: USAGE_ID
+            description: "Unique cellular usage record identifier."
+            tests:
+              - not_null
+              - unique
+          - name: CUSTOMER_ID
+            description: "Subscriber customer ID."
+            tests:
+              - not_null
+
+      - name: raw_support_tickets
+        description: "Customer care service desk tickets and complaints."
+        columns:
+          - name: TICKET_ID
+            description: "Unique service ticket ID."
+            tests:
+              - not_null
+              - unique
+          - name: CUSTOMER_ID
+            description: "Customer foreign key."
+            tests:
+              - not_null
+
+      - name: raw_network_outages
+        description: "Cell tower network outage logs and downtime incident tracking."
+        columns:
+          - name: OUTAGE_ID
+            description: "Unique network outage event identifier."
+            tests:
+              - not_null
+              - unique
+          - name: TOWER_ID
+            description: "Impacted cell tower identifier."
+            tests:
+              - not_null

@@ -1,0 +1,71 @@
+{{ config(
+    materialized='table'
+) }}
+
+WITH customers AS (
+    SELECT * FROM {{ ref('dim_customers') }}
+),
+
+billing AS (
+    SELECT
+        CUSTOMER_ID,
+        SUM(CASE WHEN PAYMENT_STATUS = 'OVERDUE' THEN 1 ELSE 0 END) AS OVERDUE_BILLS_COUNT,
+        AVG(DAYS_TO_PAY) AS AVG_PAYMENT_DELAY_DAYS
+    FROM {{ ref('fct_billing_payments') }}
+    GROUP BY CUSTOMER_ID
+)
+
+SELECT
+    c.CUSTOMER_ID,
+    c.GENDER,
+    c.SENIOR_CITIZEN,
+    c.TENURE_MONTHS,
+    c.TENURE_COHORT,
+    c.CONTRACT,
+    c.PAYMENT_METHOD,
+    c.MONTHLY_CHARGES,
+    c.TOTAL_CHARGES,
+    c.ACTIVE_SERVICES_COUNT,
+    c.TOTAL_SUPPORT_TICKETS,
+    c.AVG_CSAT_SCORE,
+    COALESCE(b.OVERDUE_BILLS_COUNT, 0) AS OVERDUE_BILLS_COUNT,
+    ROUND(COALESCE(b.AVG_PAYMENT_DELAY_DAYS, 0), 1) AS AVG_PAYMENT_DELAY_DAYS,
+    c.CHURN_FLAG,
+
+    -- Multi-factor churn risk scoring (0 to 100 points)
+    (
+        -- Contract factor: Month-to-month contracts have high churn
+        (CASE WHEN c.CONTRACT = 'Month-to-month' THEN 35 WHEN c.CONTRACT = 'One year' THEN 15 ELSE 5 END) +
+        -- Tenure factor: Low tenure has higher churn
+        (CASE WHEN c.TENURE_MONTHS <= 6 THEN 25 WHEN c.TENURE_MONTHS <= 12 THEN 15 WHEN c.TENURE_MONTHS <= 24 THEN 8 ELSE 0 END) +
+        -- Support tickets factor
+        (CASE WHEN c.TOTAL_SUPPORT_TICKETS >= 3 THEN 20 WHEN c.TOTAL_SUPPORT_TICKETS >= 1 THEN 10 ELSE 0 END) +
+        -- Low CSAT factor
+        (CASE WHEN c.AVG_CSAT_SCORE <= 2.0 THEN 15 WHEN c.AVG_CSAT_SCORE <= 3.0 THEN 8 ELSE 0 END) +
+        -- Overdue bills factor
+        (CASE WHEN COALESCE(b.OVERDUE_BILLS_COUNT, 0) > 0 THEN 15 ELSE 0 END)
+    ) AS CHURN_RISK_SCORE,
+
+    CASE
+        WHEN (
+            (CASE WHEN c.CONTRACT = 'Month-to-month' THEN 35 WHEN c.CONTRACT = 'One year' THEN 15 ELSE 5 END) +
+            (CASE WHEN c.TENURE_MONTHS <= 6 THEN 25 WHEN c.TENURE_MONTHS <= 12 THEN 15 WHEN c.TENURE_MONTHS <= 24 THEN 8 ELSE 0 END) +
+            (CASE WHEN c.TOTAL_SUPPORT_TICKETS >= 3 THEN 20 WHEN c.TOTAL_SUPPORT_TICKETS >= 1 THEN 10 ELSE 0 END) +
+            (CASE WHEN c.AVG_CSAT_SCORE <= 2.0 THEN 15 WHEN c.AVG_CSAT_SCORE <= 3.0 THEN 8 ELSE 0 END) +
+            (CASE WHEN COALESCE(b.OVERDUE_BILLS_COUNT, 0) > 0 THEN 15 ELSE 0 END)
+        ) >= 65 THEN 'HIGH RISK'
+        WHEN (
+            (CASE WHEN c.CONTRACT = 'Month-to-month' THEN 35 WHEN c.CONTRACT = 'One year' THEN 15 ELSE 5 END) +
+            (CASE WHEN c.TENURE_MONTHS <= 6 THEN 25 WHEN c.TENURE_MONTHS <= 12 THEN 15 WHEN c.TENURE_MONTHS <= 24 THEN 8 ELSE 0 END) +
+            (CASE WHEN c.TOTAL_SUPPORT_TICKETS >= 3 THEN 20 WHEN c.TOTAL_SUPPORT_TICKETS >= 1 THEN 10 ELSE 0 END) +
+            (CASE WHEN c.AVG_CSAT_SCORE <= 2.0 THEN 15 WHEN c.AVG_CSAT_SCORE <= 3.0 THEN 8 ELSE 0 END) +
+            (CASE WHEN COALESCE(b.OVERDUE_BILLS_COUNT, 0) > 0 THEN 15 ELSE 0 END)
+        ) >= 35 THEN 'MEDIUM RISK'
+        ELSE 'LOW RISK'
+    END AS CHURN_RISK_TIER,
+
+    c.LOAD_DATE
+
+FROM customers c
+LEFT JOIN billing b
+    ON c.CUSTOMER_ID = b.CUSTOMER_ID

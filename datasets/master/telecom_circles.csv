@@ -1,0 +1,10 @@
+circle_id,circle_name,category,headquarters
+CIR01,Karnataka,Metro,Bengaluru
+CIR02,Mumbai,Metro,Mumbai
+CIR03,Delhi NCR,Metro,New Delhi
+CIR04,Kolkata,Metro,Kolkata
+CIR05,Tamil Nadu,Circle A,Chennai
+CIR06,Maharashtra & Goa,Circle A,Pune
+CIR07,Andhra Pradesh & Telangana,Circle A,Hyderabad
+CIR08,Gujarat,Circle A,Ahmedabad
+CIR09,Rajasthan,Circle B,Jaipur

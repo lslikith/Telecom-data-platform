@@ -1,0 +1,14 @@
+telecom_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT', 'AVQXGPE-JC49269') }}"
+      user: "{{ env_var('SNOWFLAKE_USER', 'LIKITH') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD', 'Likithliki@9535') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE', 'ACCOUNTADMIN') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'TELECOM_WH') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE', 'TELECOM_DB') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA', 'STAGING') }}"
+      threads: 4
+      client_session_keep_alive: False
